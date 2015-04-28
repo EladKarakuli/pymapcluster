@@ -2,7 +2,8 @@
 import globalmaptiles as globaltiles
 from math import cos, sin, atan2, sqrt
 ##
- 
+
+
 def center_geolocation(geolocations):
     """
     Provide a relatively accurate center lat, lon returned as a list pair, given
@@ -69,30 +70,30 @@ def cluster_markers(mercator, latlngs, zoom, gridsize=50):
     return centers, clusters
 
 def create_clusters_centers(markers, zoom, radius):
-    mercator = GlobalMercator()
-    centers, clusters = clust.cluster_markers(mercator, markers, zoom, radius);
+    mercator = globaltiles.GlobalMercator()
+    centers, clusters = cluster_markers(mercator, markers, zoom, radius);
     centers_markers = [markers[i] for i in centers]
     return centers_markers, clusters
 
 def cluster_json(clust_marker, clust_size):
     return {
-        'longitude': clust_marker.lon,
-        'latutude': clust_marker.lat,
+        'longitude': clust_marker[0],
+        'latutude': clust_marker[1],
         'size': clust_size
     }
 
 def get_cluster_size(index, clusters):
     from collections import Counter
     #TODO: don't call Counter for every cluster in the array
-    return Counter[index](clusters)
+    return Counter(clusters)[index]
 
-def get_clusters_json(markers, zoom, radius):
-    centers, clusters = create_clusters_centers(marker, zoom, radius)
+def get_clusters_json(markers, zoom, radius=50):
+    centers, clusters = create_clusters_centers(markers, zoom, radius)
     json_clusts=[]
 
     for i, point in enumerate(centers):
-        json_clusts.append(cluster_json(point), get_clusters_json(i, clusters))
-
+        json_clusts.append(cluster_json(point, get_cluster_size(i, clusters)))
+    
     return {
         'clusters': json_clusts
     }

@@ -15,12 +15,14 @@ markers = [(random.uniform(*bounds['lat']), random.uniform(*bounds['lng']))
 mercator = GlobalMercator()
 centers, clusters = clust.cluster_markers(mercator, markers, 8);
 clust_markers = [markers[i] for i in centers]
+json_markers = clust.get_clusters_json(markers, 8)
 
 @app.route("/")
 def index():
     return render_template('index.html',
                            markers=json.dumps(markers),
-                           clust_markers=json.dumps(clust_markers))
+                           clust_markers=json.dumps(clust_markers),
+                           json_markers=json.dumps(json_markers))
 
 if __name__ == "__main__":
     app.run(debug=True)

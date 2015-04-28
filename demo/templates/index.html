@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=yes" />
         <style type="text/css">
           html { height: 100% }
           body { height: 100%; margin: 0; padding: 0 }
           #wrap { width: 810px; margin:0 auto; }
+          #wrap2 { width: 810px; margin:0 auto; }
+          #jresult { width: 810px; margin:0 auto; height: auto; }
           #left_col { float: left; width: 400px; }
           #right_col { float:right; width: 400px; margin-left: 10px;}
           #orig_map { width: 400px; height: 400px; }
@@ -13,6 +15,9 @@
         </style>
     </head>
     <body>
+        <div id="wrap2">
+            <div id="jresult"></div>
+        </div>
         <div id="wrap">
             <div id="left_col">
                 <h1>Original</h1>
@@ -51,9 +56,11 @@
             }
             var _markers = {{ markers|safe }};
             var _clust_markers = {{ clust_markers|safe }};
+            var _json_clust = {{ json_markers|safe }}
             $(function() {
                 window.origMap = initMap($('#orig_map')[0], _markers);
                 window.clustMap = initMap($('#clust_map')[0], _clust_markers);
+                $('#jresult').append(JSON.stringify(_json_clust) + "\n\r" + _clust_markers.length);
             });
         </script>
     </body>
