@@ -14,7 +14,7 @@ markers = [(random.uniform(*bounds['lat']), random.uniform(*bounds['lng']))
 
 mercator = GlobalMercator()
 centers, clusters = clust.cluster_markers(mercator, markers, 8);
-clust_markers = [markers[i] for i in centers]
+clust_markers = clust.centers_markers_by_indices(markers, centers)
 json_markers = clust.get_clusters_json(markers, 8)
 
 @app.route("/")

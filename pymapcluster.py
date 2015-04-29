@@ -1,6 +1,6 @@
 ##
 import globalmaptiles as globaltiles
-from math import cos, sin, atan2, sqrt
+from math import cos, sin, atan2, sqrt, pi
 ##
 
 
@@ -11,13 +11,16 @@ def center_geolocation(geolocations):
     ex: in: geolocations = ((lat1,lon1), (lat2,lon2),)
         out: (center_lat, center_lon)
     """
+    if len(geolocations) == 0:
+        return
+
     x = 0
     y = 0
     z = 0
  
-    for lat, lon in geolocations:
-        lat = float(lat)
-        lon = float(lon)
+    for i, (lat, lon) in enumerate(geolocations):
+        lat = float(lat) * pi / 180
+        lon = float(lon) * pi / 180
         x += cos(lat) * cos(lon)
         y += cos(lat) * sin(lon)
         z += sin(lat)
@@ -26,7 +29,7 @@ def center_geolocation(geolocations):
     y = float(y / len(geolocations))
     z = float(z / len(geolocations))
  
-    return (atan2(y, x), atan2(z, sqrt(x * x + y * y)))
+    return (atan2(z, sqrt(x * x + y * y)) * 180 / pi, (atan2(y, x) * 180 / pi))
 
 def latlng_to_zoompixels(mercator, lat, lng, zoom):
     mx, my = mercator.LatLonToMeters(lat, lng)
@@ -64,16 +67,16 @@ def cluster_markers(mercator, latlngs, zoom, gridsize=50):
                 break
         if not assigned:
             # Create new cluster fo point
-            #TODO center_geolocation the center!
             centers.append(i)
             clusters.append(len(centers) - 1)
     return centers, clusters
 
+def centers_markers_by_indices(markers, centers):
+    return [markers[i] for i in centers]
+
 def create_clusters_centers(markers, zoom, radius):
     mercator = globaltiles.GlobalMercator()
-    centers, clusters = cluster_markers(mercator, markers, zoom, radius);
-    centers_markers = [markers[i] for i in centers]
-    return centers_markers, clusters
+    return cluster_markers(mercator, markers, zoom, radius)
 
 def cluster_json(clust_marker, clust_size):
     return {
@@ -91,12 +94,31 @@ def get_clusters_json(markers, zoom, radius=50):
     centers, clusters = create_clusters_centers(markers, zoom, radius)
     json_clusts=[]
 
+    #centers = centers_markers_by_indices(markers, centers)
+    centers = calc_geo_centers(markers, centers, clusters)
+
     for i, point in enumerate(centers):
         json_clusts.append(cluster_json(point, get_cluster_size(i, clusters)))
-    
+
     return {
         'clusters': json_clusts
     }
+
+def calc_geo_centers(markers, centers, clusters):
+    geo_centers = []
+    
+    for i in range(0, len(centers)):
+        geo_centers.append(center_geolocation([
+            markers[index] for index in findall(clusters, i)]))
+        print len(geo_centers)
+        print geo_centers[len(geo_centers)-1]
+        print markers[centers[i]]
+
+    return geo_centers
+
+def findall(L, value, start=0):
+    return [i for i, x in enumerate(L) if x == value]
+
 
 ##
 if __name__ == '__main__':
